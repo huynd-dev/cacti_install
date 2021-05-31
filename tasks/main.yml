@@ -1,0 +1,76 @@
+---
+- name: Update cache repo
+  apt:
+    update_cache: yes
+
+- name: Install php
+  apt:
+    name: "{{ php_packages }}"
+    state: latest
+    #  with_items:
+
+- name: Install mariadb
+  apt:
+    name: mariadb-server
+    state: latest
+
+- name: config mariadb
+  template:
+    src: 50-server.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+  notify:
+    restart_mariadb
+
+- name: Create a new database with name 'cacti'
+  community.mysql.mysql_db:
+    name: "{{ database }}"
+    collation: "utf8mb4_unicode_ci"
+    encoding: "utf8mb4"
+    state: present
+
+- name: Create database user with name 'cacti_user' and password '******' with all database privileges
+  community.mysql.mysql_user:
+    name: "{{ username_db }}"
+    password: "{{ password_cacti_user }}"
+    priv: '*.*:ALL'
+    state: present
+
+- name: Install snmp
+  apt:
+    name: "{{ snmp_packages }}"
+    state: latest
+
+- name: Install rrdtool
+  apt:
+    name: rrdtool
+    state: latest
+
+- name: Install cacti
+  apt:
+    name: {{ item }}
+    state: latest
+  with_items:
+    - cacti 
+    - cacti-spine
+
+- name: Import cacti mysql database schema
+  community.mysql.mysql_db:
+    name: cacti
+    state: import
+    target: /usr/share/doc/cacti/cacti.sql
+    force: yes
+
+- name: Config snmp
+  template:
+    src: snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+  notify:
+    restart_snmpd
+
+- name: Recursively change ownership of /usr/share/cacti
+  ansible.builtin.file:
+    path: /usr/share/cacti
+    state: directory
+    recurse: yes
+    owner: www-data
+    group: www-data

@@ -1,0 +1,31 @@
+php_packages:
+  - php
+  - php-mysql
+  - php-curl
+  - php-net-socket
+  - php-gd
+  - php-intl
+  - php-pear
+  - php-imap
+  - php-memcache
+  - php-pspell
+  - php-tidy
+  - php-xmlrpc
+  - php-snmp
+  - php-mbstring
+  - php-gmp
+  - php-json
+  - php-xml
+  - php-common
+  - libapache2-mod-php
+
+snmp_packages:
+  - snmp
+  - snmpd
+  - snmp-mibs-downloader
+
+
+database: cacti
+port_db: 3306
+username_db: cacti_user
+password_db: cAS23VAs6SHF
